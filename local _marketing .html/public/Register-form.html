@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register - Local Bazaar</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="auth-section">
+    <h2>Register</h2>
+    <form id="register-form">
+      <input type="text" id="register-username" placeholder="Username" required />
+      <input type="password" id="register-password" placeholder="Password" required />
+      <input type="tel" id="register-phone" placeholder="Phone Number" required />
+
+      <select id="register-role" required>
+        <option value="">Select Role</option>
+        <option value="shopkeeper">Shopkeeper</option>
+        <option value="customer">Customer</option>
+      </select>
+
+      <!-- Shopkeeper fields - hidden by default -->
+      <div id="shopkeeper-fields" style="display: none;">
+        <input type="text" id="shop-name" placeholder="Shop Name" />
+        <input type="text" id="shop-location" placeholder="Shop Location" />
+        <input type="file" id="shop-image" accept="image/*" />
+      </div>
+
+      <button type="submit">Register</button>
+    </form>
+
+    <a href="index.html">Back to Login</a>
+    <button><a href="home.html">Home</a></button>
+  </div>
+
+  <script>
+    // Show shop fields when "Shopkeeper" is selected
+    const roleSelect = document.getElementById('register-role');
+    const shopFields = document.getElementById('shopkeeper-fields');
+
+    roleSelect.addEventListener('change', () => {
+      shopFields.style.display = roleSelect.value === 'shopkeeper' ? 'block' : 'none';
+    });
+
+    // Register logic
+    document.getElementById('register-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const username = document.getElementById('register-username').value.trim();
+      const password = document.getElementById('register-password').value.trim();
+      const phone = document.getElementById('register-phone').value.trim();
+      const role = roleSelect.value;
+
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+
+      const existingUser = users.find(user => user.username === username);
+      if (existingUser) {
+        alert('Username already exists!');
+        return;
+      }
+
+      let newUser = { username, password, phone, role };
+
+      if (role === 'shopkeeper') {
+        const shopName = document.getElementById('shop-name').value.trim();
+        const shopLocation = document.getElementById('shop-location').value.trim();
+        const shopImageInput = document.getElementById('shop-image');
+        let shopImage = "";
+
+        if (shopImageInput.files.length > 0) {
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            shopImage = event.target.result;
+
+            newUser.shopInfo = { shopName, shopLocation, shopImage };
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            alert('Shopkeeper registered successfully!');
+            window.location.href = 'index.html';
+          };
+          reader.readAsDataURL(shopImageInput.files[0]);
+        } else {
+          alert("Please upload your shop image.");
+        }
+      } else {
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+        alert('Customer registered successfully!');
+        window.location.href = 'index.html';
+      }
+    });
+    
+  </script>
+</body>
+</html>
